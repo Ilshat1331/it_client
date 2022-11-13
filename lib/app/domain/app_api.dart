@@ -22,4 +22,6 @@ abstract class AppApi {
   Future<dynamic> refreshToken({String? refreshToken});
 
   Future<dynamic> request(String path);
+
+  Future<dynamic> fetch(dynamic options);
 }

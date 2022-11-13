@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:it_client/features/auth/domain/auth_state/auth_cubit.dart';
 import 'package:it_client/features/auth/domain/entities/user_entity/user_entity.dart';
+import 'package:it_client/features/auth/ui/update_profile_screen.dart';
 
 class UserScreen extends StatelessWidget {
   const UserScreen({super.key});
@@ -51,12 +52,23 @@ class UserScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => UpdateProfileScreen(),
+                            ));
+                      },
                       child: const Text("Refresh password"),
                     ),
                     const SizedBox(width: 16.0),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        context.read<AuthCubit>().updateProfile(
+                              username: '11',
+                              email: '11',
+                            );
+                      },
                       child: const Text("Update profile"),
                     ),
                   ],

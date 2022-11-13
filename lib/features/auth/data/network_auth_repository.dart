@@ -69,8 +69,15 @@ class NetworkAuthRepository implements AuthRepository {
   }
 
   @override
-  Future updateProfile({String? username, String? email}) {
-    // TODO: implement updateProfile
-    throw UnimplementedError();
+  Future updateProfile({String? username, String? email}) async {
+    try {
+      final response = await api.updateProfile(
+        username: username,
+        email: email,
+      );
+      return UserDto.fromJson(response.data["data"]).toEntity();
+    } catch (_) {
+      rethrow;
+    }
   }
 }
