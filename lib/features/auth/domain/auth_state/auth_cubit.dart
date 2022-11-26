@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:it_client/app/domain/error_entity/error_entity.dart';
 import 'package:it_client/features/auth/domain/auth_repository.dart';
 import 'package:it_client/features/auth/domain/entities/user_entity/user_entity.dart';
 
@@ -50,6 +52,7 @@ class AuthCubit extends HydratedCubit<AuthState> {
 
   Future<void> getProfile() async {
     try {
+      _updateUserState(const AsyncSnapshot.waiting());
       final UserEntity newUserEntity = await authRepository.getProfile();
       emit(
         state.maybeWhen(
@@ -62,9 +65,23 @@ class AuthCubit extends HydratedCubit<AuthState> {
           ),
         ),
       );
-    } catch (error, stackTrace) {
-      addError(error, stackTrace);
+      _updateUserState(
+        const AsyncSnapshot.withData(
+            ConnectionState.done, "Успешное получение данных"),
+      );
+    } catch (error) {
+      _updateUserState(AsyncSnapshot.withError(ConnectionState.done, error));
     }
+  }
+
+  void _updateUserState(AsyncSnapshot asyncSnapshot) {
+    emit(state.maybeWhen(
+      orElse: () => state,
+      authorized: (userEntity) {
+        return AuthState.authorized(
+            userEntity.copyWith(userState: asyncSnapshot));
+      },
+    ));
   }
 
   Future<void> updateProfile({
@@ -72,6 +89,8 @@ class AuthCubit extends HydratedCubit<AuthState> {
     required String email,
   }) async {
     try {
+      _updateUserState(const AsyncSnapshot.waiting());
+      await Future.delayed(const Duration(seconds: 1));
       final UserEntity newUserEntity = await authRepository.updateProfile(
         username: username,
         email: email,
@@ -87,8 +106,33 @@ class AuthCubit extends HydratedCubit<AuthState> {
           ),
         ),
       );
-    } catch (error, stackTrace) {
-      addError(error, stackTrace);
+      _updateUserState(
+        const AsyncSnapshot.withData(
+            ConnectionState.done, "Успешное обновление данных"),
+      );
+    } catch (error) {
+      _updateUserState(AsyncSnapshot.withError(ConnectionState.done, error));
+    }
+  }
+
+  Future<void> updatePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    try {
+      _updateUserState(const AsyncSnapshot.waiting());
+      await Future.delayed(const Duration(seconds: 1));
+      if (newPassword.trim().isEmpty == true ||
+          newPassword.trim().isEmpty == true) {
+        throw ErrorEntity(message: "Поля не могут быть пустыми");
+      }
+      final message = await authRepository.updatePassword(
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
+      _updateUserState(AsyncSnapshot.withData(ConnectionState.done, message));
+    } catch (error) {
+      _updateUserState(AsyncSnapshot.withError(ConnectionState.done, error));
     }
   }
 

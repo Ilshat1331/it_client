@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:it_client/app/di/init_di.dart';
@@ -20,7 +21,12 @@ class MainAppRunner implements AppRunner {
   @override
   Future<void> run(AppBuilder appBuilder) async {
     HydratedBloc.storage = await HydratedStorage.build(
-        storageDirectory: await getApplicationDocumentsDirectory());
+      storageDirectory: kIsWeb
+          ? HydratedStorage.webStorageDirectory
+          : await getTemporaryDirectory(),
+    );
+    // HydratedBloc.storage = await HydratedStorage.build(
+    //     storageDirectory: await getApplicationDocumentsDirectory());
     await preloadData();
     runApp(appBuilder.buildApp());
   }

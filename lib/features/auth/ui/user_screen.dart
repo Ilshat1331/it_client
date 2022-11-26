@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:it_client/app/domain/error_entity/error_entity.dart';
+import 'package:it_client/app/ui/app_loader.dart';
+import 'package:it_client/app/ui/components/app_snack_bar.dart';
 import 'package:it_client/features/auth/domain/auth_state/auth_cubit.dart';
 import 'package:it_client/features/auth/domain/entities/user_entity/user_entity.dart';
+import 'package:it_client/features/auth/ui/update_password_screen.dart';
 import 'package:it_client/features/auth/ui/update_profile_screen.dart';
 
 class UserScreen extends StatelessWidget {
@@ -22,19 +26,37 @@ class UserScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: BlocBuilder<AuthCubit, AuthState>(
+      body: BlocConsumer<AuthCubit, AuthState>(
+        listener: (context, state) {
+          state.whenOrNull(
+            authorized: (userEntity) {
+              if (userEntity.userState?.hasData == true) {
+                AppSnackBar.showSnackBarWithMessage(
+                    context, userEntity.userState?.data);
+              }
+              if (userEntity.userState?.hasError == true) {
+                AppSnackBar.showSnackBarWithError(context,
+                    ErrorEntity.fromException(userEntity.userState?.error));
+              }
+            },
+          );
+        },
         builder: (context, state) {
           final UserEntity? user = state.whenOrNull(
             authorized: (userEntity) => userEntity,
           );
+          if (user?.userState?.connectionState == ConnectionState.waiting) {
+            return const AppLoager();
+          }
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
                 Row(
                   children: [
-                    CircleAvatar(
-                      child: Text(user?.username.split("").first ?? "?"),
+                    const CircleAvatar(
+                      child: Text("?"),
+                      // child: Text(user?.username.split("").first ?? "?"),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -54,20 +76,23 @@ class UserScreen extends StatelessWidget {
                     TextButton(
                       onPressed: () {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => UpdateProfileScreen(),
-                            ));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const UpdatePasswordScreen(),
+                          ),
+                        );
                       },
                       child: const Text("Refresh password"),
                     ),
                     const SizedBox(width: 16.0),
                     TextButton(
                       onPressed: () {
-                        context.read<AuthCubit>().updateProfile(
-                              username: '11',
-                              email: '11',
-                            );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const UpdateProfileScreen(),
+                          ),
+                        );
                       },
                       child: const Text("Update profile"),
                     ),

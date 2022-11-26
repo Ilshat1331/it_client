@@ -3,24 +3,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:it_client/app/ui/components/app_text_field.dart';
 import 'package:it_client/features/auth/domain/auth_state/auth_cubit.dart';
 
-class UpdateProfileScreen extends StatefulWidget {
-  const UpdateProfileScreen({Key? key}) : super(key: key);
+class UpdatePasswordScreen extends StatefulWidget {
+  const UpdatePasswordScreen({Key? key}) : super(key: key);
 
   @override
-  State<UpdateProfileScreen> createState() => _UpdateProfileScreenState();
+  State<UpdatePasswordScreen> createState() => _UpdatePasswordScreenState();
 }
 
-class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
-  final emailController = TextEditingController();
+class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
+  final newPasswordController = TextEditingController();
 
-  final usernameController = TextEditingController();
+  final oldPasswordController = TextEditingController();
 
   final GlobalKey<FormState> formKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
-    emailController.text = "";
-    usernameController.text = "";
+    newPasswordController.text = "";
+    oldPasswordController.text = "";
     return Scaffold(
       appBar: AppBar(
         title: const Text("Update profile screen"),
@@ -38,19 +38,24 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  AppTextField(controller: emailController, labelText: "Email"),
+                  AppTextField(
+                    controller: oldPasswordController,
+                    labelText: "Old Password",
+                  ),
                   const SizedBox(height: 8),
                   AppTextField(
-                      controller: usernameController, labelText: "Username"),
+                    controller: newPasswordController,
+                    labelText: "New Password",
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          context.read<AuthCubit>().updateProfile(
-                                username: usernameController.text,
-                                email: emailController.text,
+                          context.read<AuthCubit>().updatePassword(
+                                oldPassword: oldPasswordController.text,
+                                newPassword: newPasswordController.text,
                               );
                           Navigator.of(context).pop();
                         },
